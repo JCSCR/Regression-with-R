@@ -1,0 +1,46 @@
+#setting the working directory
+library(dplyr) #data manipulation
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(summarytools)
+library(qcc)
+setwd("C:\\Users\\user\\Desktop\\breakeven point") 
+main=read.csv("Copy of Strokes.csv")
+view(main)
+main=main[2:4]
+sum(is.na(main))
+main=drop_na(main)
+main=main %>% filter(data.frame(main>0))
+main
+attach(main)
+plot(Strokes,units)
+main=main%>%mutate(ups=round((units/Strokes), digits = 2), .after=units )
+dfSummary(main)
+summary(main)
+control_chart= qcc(main, type = "R", nsigmas = 3)
+summary(control_chart)
+plot(Strokes,ups)
+cor(ups,Strokes)
+
+reg=lm(Strokes~ups,data = main)
+summary(reg)
+
+reg2=lm(log10(Strokes)~ups,data = main)
+summary(reg2)
+
+plot1=ggplot(main)+aes(ups,Strokes)
+plot1=plot1+geom_point()
+plot1
+plot(ups,log10(Strokes),col="blue")
+abline(reg2)
+
+data_pred=data.frame(ups=0.60)
+
+prediction=predict(reg,data_pred,interval=c("prediction"),level=0.95)
+prediction
+prediction2=predict(reg2,data_pred,interval=c("prediction"),level=0.95)
+prediction2
+result=prediction2[1]
+result=10^5.58700444795584
+result
