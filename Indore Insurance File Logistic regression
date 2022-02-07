@@ -12,22 +12,27 @@ dfSummary(main)
 dfSummary(test)
 colSums(is.na(main))
 colSums(is.na(test))
-attach(main)
-## for main data
+## for main data : Data Type conversion
 main$region=as.factor(main$region)
 main$Employment.Type=as.factor(main$Employment.Type)
+main$MobileNo_Avl_Flag=as.factor(main$MobileNo_Avl_Flag)
+main$Aadhar_flag=as.factor(main$Aadhar_flag)
+main$PAN_flag=as.factor(main$PAN_flag)
+main$VoterID_flag=as.factor(main$VoterID_flag)
+main$Driving_flag=as.factor(main$Driving_flag)
+main$Passport_flag=as.factor(main$Passport_flag)
 summary(main$Employment.Type)
-## for test data
+## for test data : Data Type conversion
 test$region=as.factor(test$region)
 test$Employment.Type=as.factor(test$Employment.Type)
+test$MobileNo_Avl_Flag=as.factor(test$MobileNo_Avl_Flag)
+test$Aadhar_flag=as.factor(test$Aadhar_flag)
+test$PAN_flag=as.factor(test$PAN_flag)
+test$VoterID_flag=as.factor(test$VoterID_flag)
+test$Driving_flag=as.factor(test$Driving_flag)
+test$Passport_flag=as.factor(test$Passport_flag)
 
-'mosaicplot(table(main$Employment.Type, main$default),
-           color = TRUE,
-           xlab = "Employment type", # label for x-axis
-           ylab = "Fraud" # label for y-axis
-)'
-
-dfSummary(main$Employment.Type)
+dfSummary(test$Employment.Type)
 
 library(statip) ## for filling the missing values for main data
 
@@ -54,38 +59,6 @@ main$DisbursalDate<-as.integer(main$DisbursalDate)
 ### calculated age at the point of disbursal date
 main=main%>%mutate(age=DisbursalDate-Date.of.Birth,.after=Date.of.Birth)
 
-### creating the age and score Bin in data
-summary(main$age)
-main$Agerange <- cut(main$age, c(seq(15,65, by = 10), Inf), include.lowest = TRUE)
-main$cns.score.range=cut(main$PERFORM_CNS.SCORE, c(seq(0,1000, by = 100), Inf), 
-                         include.lowest = TRUE)
-summary(asset_cost)
-main$asset_range=cut(main$asset_cost, c(seq(0,1000000, by = 50000), Inf),
-                     include.lowest = TRUE)
-summary(disbursed_amount)
-main$disbursed_amountrange=cut(main$disbursed_amount, c(seq(0,600000, by = 100000), Inf),
-                     include.lowest = TRUE)
-#for test data
-test$Agerange=cut(test$age, c(seq(15,65, by = 10), Inf), include.lowest = TRUE)
-test$cns.score.range=cut(test$PERFORM_CNS.SCORE, c(seq(0,1000, by = 100), Inf), 
-                         include.lowest = TRUE)
-test$asset_range=cut(test$asset_cost, c(seq(0,1000000, by = 50000), Inf),
-                     include.lowest = TRUE)
-test$disbursed_amountrange=cut(test$disbursed_amount, c(seq(0,600000, by = 100000), Inf),
-                          include.lowest = TRUE)
-'mosaicplot(table(main$default,main$age),
-           color = TRUE,
-           xlab = "age", # label for x-axis
-           ylab = "Fraud" # label for y-axis
-)'
-
-
-ggplot(data=main, aes(main$disbursed_amount)) +
-  geom_histogram(aes(y =..density..), fill = "orange") +
-  geom_density()
-boxplot(disbursed_amount)
-summary(disbursed_amount)
-
 ## changing Date from char to date format for test data
 test$Date.of.Birth<-as.Date(test$Date.of.Birth, "%d-%m-%Y")
 test$DisbursalDate<-as.Date(test$DisbursalDate, "%d-%m-%Y")
@@ -96,10 +69,41 @@ test$DisbursalDate<-format(test$DisbursalDate, "%Y")
 ## converting it to the integer format for test data
 test$Date.of.Birth <- as.integer(test$Date.of.Birth)
 test$DisbursalDate<-as.integer(test$DisbursalDate)
-### calculated age at the point of disbursal date for test data
-test$age=test$DisbursalDate-test$Date.of.Birth
-test <- test %>% relocate(test$age, .after = test$DisbursalDate)
+### calculated age at the point of disbursal date
+test=test%>%mutate(age=DisbursalDate-Date.of.Birth,.after=Date.of.Birth)
 
+
+### creating the age and score Bin in data
+summary(main$age)
+main$Agerange <- cut(as.numeric(main$age), c(seq(15,65, by = 10), Inf), include.lowest = TRUE)
+main$cns.score.range=cut(main$PERFORM_CNS.SCORE, c(seq(0,1000, by = 100), Inf), 
+                         include.lowest = TRUE)
+summary(asset_cost)
+main$asset_range=cut(main$asset_cost, c(seq(0,1000000, by = 50000), Inf),
+                     include.lowest = TRUE)
+summary(disbursed_amount)
+main$disbursed_amountrange=cut(main$disbursed_amount, c(seq(0,600000, by = 100000), Inf),
+                               include.lowest = TRUE)
+#for test data
+test$Agerange=cut(as.numeric(test$age), c(seq(15,65, by = 10), Inf), include.lowest = TRUE)
+test$cns.score.range=cut(test$PERFORM_CNS.SCORE, c(seq(0,1000, by = 100), Inf), 
+                         include.lowest = TRUE)
+test$asset_range=cut(test$asset_cost, c(seq(0,1000000, by = 50000), Inf),
+                     include.lowest = TRUE)
+test$disbursed_amountrange=cut(test$disbursed_amount, c(seq(0,600000, by = 100000), Inf),
+                               include.lowest = TRUE)
+'mosaicplot(table(main$default,main$age),
+           color = TRUE,
+           xlab = "age", # label for x-axis
+           ylab = "Fraud" # label for y-axis
+)'
+
+
+'ggplot(data=main, aes(main$disbursed_amount)) +
+  geom_histogram(aes(y =..density..), fill = "orange") +
+  geom_density()
+boxplot(disbursed_amount)
+summary(disbursed_amount)'
 
 library(stringr)
 
@@ -126,10 +130,6 @@ main$CreHisMonths <- gsub("mon", "", main$CreHisMonths)
 
 main$CreHisMonths <- as.numeric(main$CreHisMonths)
 
-
-test$CreHisMonths <- gsub("mon", "", test$CreHisMonths)
-
-test$CreHisMonths <- as.numeric(test$CreHisMonths)
 #Deriving credit history in months from credit history character column - test Data
 
 #head(train$CREDIT.HISTORY.LENGTH)
@@ -193,52 +193,77 @@ pred_ROCR <- prediction(predicted, main$default)
 
 roc_ROCR <- performance(pred_ROCR, measure = "tpr", x.measure = "fpr")
 
-
-
 plot(roc_ROCR, main = "ROC curve", colorize = T)
 
-
 abline(a = 0, b = 1)
-
-
 
 auc_ROCR <- performance(pred_ROCR, measure = "auc")
 
 auc_ROCR <- auc_ROCR@y.values[[1]]
 
 auc_ROCR
-
+################################################################################
 predicted_test<-predict(fit1,type="response",newdata=test)
 
 summary(predicted_test)
 
 predicted_test<- ifelse(predicted_test>=0.22,1,0)
 
-(table(test$default,predicted_test))
-
-pred_ROCR_test <- prediction(predicted_test, test$default)
-
-roc_ROCR_test <- performance(pred_ROCR_test, measure = "tpr", x.measure = "fpr")
-
-plot(roc_ROCR_test, main = "ROC curve", colorize = T)
-
-abline(a = 0, b = 1)
-
-
-auc_ROCR <- performance(pred_ROCR_test, measure = "auc")
-
-auc_ROCR_test <- auc_ROCR@y.values[[1]]
-
-auc_ROCR_test
-
 PredictedProb<-predict(fit1,type="response",newdata=test)
-
-
-
-Submission 
+#########################################################
+##Submission1##
 
 submission <- read.csv("loan_details_sample.csv",header = T,na.strings = "")
 
 submission$default <- PredictedProb
 
 head(submission)
+write.csv(submission, "submission.csv", row.names = FALSE)
+################################################################################
+
+fit2 <- glm(formula = default ~ CreHisMonths + scale(NO.OF_INQUIRIES) + 
+              DELINQUENT.ACCTS.IN.LAST.SIX.MONTHS + region +branch_id+
+              scale(ltv) + age + cns.score.range + asset_range
+            +Aadhar_flag+disbursed_amountrange, family = "binomial", 
+            data = main)
+summary(fit2)
+
+vif(fit2)
+
+predicted2<-predict(fit2,type="response")
+str(predicted2)
+predicted2<- ifelse(predicted2>=0.22,1,0)
+table2=table(main$default,predicted2)
+table2
+1 - sum(diag(table2)) / sum(table2)
+
+pred_ROCR2 <- prediction(predicted2, main$default)
+
+roc_ROCR2 <- performance(pred_ROCR2, measure = "tpr", x.measure = "fpr")
+
+plot(roc_ROCR2, main = "ROC curve", colorize = T)
+
+abline(a = 0, b = 1)
+
+auc_ROCR2 <- performance(pred_ROCR2, measure = "auc")
+
+auc_ROCR2 <- auc_ROCR2@y.values[[1]]
+
+auc_ROCR2
+################################################################################
+predicted_test2<-predict(fit2,type="response",newdata=test)
+
+summary(predicted_test2)
+
+predicted_test2<- ifelse(predicted_test2>=0.22,1,0)
+
+PredictedProb2<-predict(fit2,type="response",newdata=test)
+
+##Submission##
+
+submission2 <- read.csv("loan_details_sample.csv",header = T,na.strings = "")
+
+submission2$default <- PredictedProb2
+
+head(submission2)
+write.csv(submission2, "submission2.csv", row.names = FALSE)
